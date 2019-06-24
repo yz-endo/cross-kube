@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+rm -rf lib
+
+rollup -c rollup.config.ts
