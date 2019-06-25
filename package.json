@@ -32,6 +32,11 @@
   "scripty": {
     "silent": true
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit"
+    }
+  },
   "lint-staged": {
     "linters": {
       "{src,test}/**/*.ts": [
@@ -60,6 +65,7 @@
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
     "deepmerge": "^3.3.0",
+    "husky": "^2.5.0",
     "jest": "^24.7.1",
     "jest-config": "^24.7.1",
     "lint-staged": "^8.0.0",
