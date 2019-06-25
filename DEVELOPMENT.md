@@ -67,16 +67,6 @@ The code templates are based on OpenAPI Generator's official `typescript-fetch`.
 2. Defines an additional `watch...()` function from a list API, which receives a callback function to handle events
 3. Removes `watch` option from list and delete APIs.
 
-### Note: Installing OpenAPI Generator 4.0.2-SNAPSHOT
-
-Until OpenAPI Generator 4.0.2 is released, you have to install the master snapshot of it in your environment.
-
-```sh
-$ git clone https://github.com/OpenAPITools/openapi-generator
-$ cd openapi-generator
-$ mvn install
-```
-
 ## JavaScript Bundle
 
 TypeScript source files in `src/` are transpiled into JavaScript files in `lib/` by:
