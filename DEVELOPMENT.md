@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+* Node.js >= 8
+* [Yarn](https://yarnpkg.com/)
 * Python and [urllib3](https://urllib3.readthedocs.io/en/latest/)
 * Java
 * Maven
