@@ -1,5 +1,35 @@
 # cross-kube Development
 
+## Prerequisites
+
+* Python and [urllib3](https://urllib3.readthedocs.io/en/latest/)
+* Java
+* Maven
+
+### Proxy Server
+
+If you use a proxy server, set the environment variables
+
+```sh
+export HTTP_PROXY=http://your-proxy.example.com:8080
+export HTTPS_PROXY=http://your-proxy.example.com:8080
+```
+
+and also edit `$HOME/.m2/settings.xml`:
+
+```xml
+<settings>
+  <proxies>
+   <proxy>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>your-proxy.example.com</host>
+      <port>8080</port>
+    </proxy>
+  </proxies>
+</settings>
+```
+
 ## Build Steps
 
 1. `yarn`
