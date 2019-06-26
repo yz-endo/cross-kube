@@ -207,11 +207,11 @@ export default class {{classname}} extends runtime.BaseAPI {
         return new runtime.JSONApiResponse<any>(response);
         {{~/isMapContainer}}
         {{~#returnSimpleType}}
-        {{~#startsWith returnType "string"}}
+        {{~#eq returnType "string"}}
         return new runtime.StringApiResponse(response);
         {{~else}}
         return new runtime.JSONApiResponse<any>(response);
-        {{~/startsWith}}
+        {{~/eq}}
         {{~/returnSimpleType}}
         {{~/returnTypeIsPrimitive}}
         {{~^returnTypeIsPrimitive}}
