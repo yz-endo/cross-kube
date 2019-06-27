@@ -50,7 +50,7 @@
     "abort-controller": "^3.0.0",
     "debug": "^4.1.1",
     "fetch-readablestream": "^0.2.0",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.0",
     "query-string": "^6.8.1"
   },
   "devDependencies": {

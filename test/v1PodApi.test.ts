@@ -1,8 +1,11 @@
+import AbortController from 'abort-controller'
+import V1Pod from '../src/models/V1Pod'
 import V1Namespace from '../src/models/V1Namespace'
 import CoreV1Api from '../src/apis/CoreV1Api'
+import { KubeEvent } from '../src/runtime'
 import { sleep, podManifest } from './helper'
 
-jest.setTimeout(20000)
+jest.setTimeout(30000)
 
 const apiUrl = process.env.KUBE_API_SERVER || 'http://localhost:4000'
 
@@ -113,5 +116,50 @@ describe('V1Pod API', () => {
         name: 'pod-1'
       })
     ).rejects.toThrow(/404: Not Found/)
+  })
+
+  it('watches Pod events', async () => {
+    const ac = new AbortController()
+    const events: KubeEvent<V1Pod>[] = []
+    const watchPromise = api.watchListNamespacedPod(
+      { namespace: testNamespace },
+      event => {
+        events.push(event)
+      },
+      ac.signal
+    )
+
+    await sleep(100)
+
+    expect(events).toHaveLength(0)
+
+    const pod1 = podManifest()
+    await api.createNamespacedPod({
+      namespace: testNamespace,
+      body: pod1
+    })
+
+    await sleep(15000)
+
+    ac.abort()
+    try {
+      await watchPromise
+    } catch (err) {
+      // catch AbortError
+    }
+
+    expect(events).toHaveLength(4)
+
+    expect(events[0].object!.status!.phase).toEqual('Pending')
+    expect(events[0].object!.status!.conditions).toBeUndefined()
+    expect(events[1].object!.status!.phase).toEqual('Pending')
+    expect(events[1].object!.status!.conditions).toHaveLength(1)
+    expect(events[1].object!.status!.containerStatuses).toBeUndefined()
+    expect(events[2].object!.status!.phase).toEqual('Pending')
+    expect(events[2].object!.status!.containerStatuses).toHaveLength(1)
+    expect(events[2].object!.status!.containerStatuses![0].ready).toBe(false)
+    expect(events[3].object!.status!.phase).toEqual('Running')
+    expect(events[3].object!.status!.containerStatuses).toHaveLength(1)
+    expect(events[3].object!.status!.containerStatuses![0].ready).toBe(true)
   })
 })

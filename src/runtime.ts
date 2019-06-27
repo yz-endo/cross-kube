@@ -1,4 +1,4 @@
-import querystring from 'query-string'
+import * as querystring from 'query-string'
 import logging from './logging'
 
 const log = {
@@ -215,7 +215,7 @@ export class BaseAPI {
   private createFetchParams(requestOpts: RequestOpts): FetchParams {
     const qs = () => {
       const { query } = requestOpts
-      if (query && query.length && query.length > 0) {
+      if (query && Object.keys(query).length > 0) {
         return `?${querystring.stringify(query)}`
       }
       return ''
