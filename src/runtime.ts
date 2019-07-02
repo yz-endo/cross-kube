@@ -104,10 +104,7 @@ export class BaseAPI {
    *
    * @param configParams - Configuration parameters
    */
-  constructor(
-    public basePath: string = DEFAULT_BASE_PATH,
-    public accessToken?: string | ((name: string, scopes?: string[]) => string)
-  ) {}
+  constructor(public basePath: string = DEFAULT_BASE_PATH) {}
 
   /**
    * Sends an API request and gets the response.

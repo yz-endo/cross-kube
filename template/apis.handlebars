@@ -68,25 +68,6 @@ export default class {{classname}} extends runtime.BaseAPI {
             headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
         }
         {{~/headerParams}}
-        {{~#authMethods}}
-        {{~#isOAuth}}
-        if (this.accessToken) {
-            if (typeof this.accessToken === 'function') {
-                headerParameters["Authorization"] = this.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}", {{/scopes}}]);
-            } else {
-                headerParameters["Authorization"] = this.accessToken;
-            }
-        }
-        {{~/isOAuth}}
-        {{~/authMethods}}
-        {{~#hasFormParams}}
-        const formData = new FormData();
-        {{~/hasFormParams}}
-        {{~#formParams}}
-        if (requestParameters.{{paramName}} !== undefined) {
-            formData.append('{{baseName}}', requestParameters.{{paramName}} as any);
-        }
-        {{~/formParams}}
 
         await this.requestStream<runtime.ItemType<{{{returnType}}}>>({
             path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
@@ -108,9 +89,6 @@ export default class {{classname}} extends runtime.BaseAPI {
             {{~/isContainer}}
             {{~/bodyParam}}
             {{~/hasBodyParam}}
-            {{~#hasFormParams}}
-            body: formData,
-            {{~/hasFormParams}}
             signal,
         }, callback);
     }
@@ -156,26 +134,6 @@ export default class {{classname}} extends runtime.BaseAPI {
             headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
         }
         {{~/headerParams}}
-        {{~#authMethods}}
-        {{~#isOAuth}}
-        if (this.configuration && this.configuration.accessToken) {
-            // oauth required
-            if (typeof this.configuration.accessToken === 'function') {
-                headerParameters["Authorization"] = this.configuration.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}", {{/scopes}}]);
-            } else {
-                headerParameters["Authorization"] = this.configuration.accessToken;
-            }
-        }
-        {{~/isOAuth}}
-        {{~/authMethods}}
-        {{~#hasFormParams}}
-        const formData = new FormData();
-        {{~/hasFormParams}}
-        {{~#formParams}}
-        if (requestParameters.{{paramName}} !== undefined) {
-            formData.append('{{baseName}}', requestParameters.{{paramName}} as any);
-        }
-        {{~/formParams}}
 
         const response = await this.request({
             path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
@@ -197,9 +155,6 @@ export default class {{classname}} extends runtime.BaseAPI {
             {{~/isContainer}}
             {{~/bodyParam}}
             {{~/hasBodyParam}}
-            {{~#hasFormParams}}
-            body: formData,
-            {{~/hasFormParams}}
         });
 
         {{~#returnTypeIsPrimitive}}
@@ -235,25 +190,3 @@ export default class {{classname}} extends runtime.BaseAPI {
     {{/operation}}
 }
 {{~/operations}}
-
-{{~#hasEnums}}
-{{~#operations}}
-{{~#operation}}
-{{~#allParams}}
-{{~#isEnum}}
-/**
- * @export
- * @enum {string}
- */
-export enum {{operationIdCamelCase}}{{enumName}} {
-{{~#allowableValues}}
-    {{~#enumVars}}
-    {{{name}}} = {{{value}}},
-    {{~/enumVars~}}
-{{~/allowableValues}}
-}
-{{~/isEnum}}
-{{~/allParams}}
-{{~/operation}}
-{{~/operations}}
-{{~/hasEnums}}

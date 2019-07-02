@@ -139,7 +139,7 @@ describe('V1Pod API', () => {
       body: pod1
     })
 
-    await sleep(15000)
+    await sleep(20000)
 
     ac.abort()
     try {

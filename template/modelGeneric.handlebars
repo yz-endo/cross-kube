@@ -24,22 +24,3 @@ export default interface {{classname}} extends KubeObject {
 
 {{/vars}}
 }
-
-{{#hasEnums}}
-{{~#vars}}
-{{~#isEnum}}
-/**
- * @export
- * @enum {string}
- */
-export enum {{classname}}{{enumName}} {
-{{~#allowableValues}}
-    {{~#enumVars}}
-    {{{name}}} = {{{value}}},
-    {{~/enumVars}}
-{{~/allowableValues}}
-}
-
-{{/isEnum}}
-{{~/vars}}
-{{~/hasEnums}}
