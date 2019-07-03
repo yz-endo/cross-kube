@@ -46,13 +46,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.openapitools</groupId>
-                        <artifactId>openapi-generator-maven-plugin</artifactId>
-                        <version>${openapi-generator-version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
