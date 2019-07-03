@@ -24,7 +24,7 @@ const plugins = [
 
 export default [
   {
-    input: ['src/**/[^\.]+.ts'],
+    input: ['src/**/*.ts'],
     output: {
       dir: 'lib',
       format: 'esm',
@@ -34,7 +34,7 @@ export default [
     external,
     watch,
     plugins: [
-      multiinput(),
+      multiinput({ glob: { ignore: ['src/libs.d.ts'] } }),
       replace({
         'process.browser': 'false'
       }),
@@ -56,25 +56,6 @@ export default [
     plugins: [
       replace({
         'process.browser': 'true'
-      }),
-      ...plugins
-    ]
-  },
-  {
-    input: {
-      runtime: 'src/index.all.ts'
-    },
-    output: {
-      dir: 'lib',
-      format: 'esm',
-      sourcemap: true,
-      banner: '/* eslint-disable */'
-    },
-    external,
-    watch,
-    plugins: [
-      replace({
-        'process.browser': 'false'
       }),
       ...plugins
     ]
