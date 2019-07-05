@@ -3,9 +3,9 @@ module.exports = {
     '.(ts|tsx)': 'ts-jest'
   },
   testEnvironment: 'node',
-  testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$',
+  testRegex: '/test\\/.*\\.test.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/test/'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/test/', '/examples/'],
   coverageThreshold: {
     global: {
       branches: 90,
