@@ -1,0 +1,192 @@
+// tslint:disable
+{{>licenseInfo}}
+
+import * as runtime from '../runtime';
+{{~#imports}}
+import {{className}} from '../models/{{className}}';
+{{~/imports}}
+
+{{#operations}}
+{{~#operation}}
+{{~#allParams.0}}
+interface {{operationIdCamelCase}}Request {
+    {{~#allParams}}
+    {{~#neq paramName "watch"}}
+    {{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}};
+    {{~/neq}}
+    {{~/allParams}}
+}
+
+{{/allParams.0}}
+{{~/operation}}
+{{~/operations}}
+{{~#operations}}
+
+/**
+ * {{#description}}{{{description}}}{{/description}}{{^description}}no description{{/description}}
+ */
+export default class {{classname}} extends runtime.BaseAPI {
+    {{~#operation}}
+    {{~#startsWith nickname "list"}}
+    /**
+     {{~#notes}}
+     * {{&notes}}
+     {{~/notes~}}
+     {{~#summary~}}
+     * {{&summary}}
+     {{~/summary}}
+     */
+     async watch{{operationIdCamelCase}}({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request{{/allParams.0}}, callback: (event: runtime.KubeEvent<runtime.ItemType<{{{returnType}}}>>) => void, signal?: AbortSignal): Promise<void> {
+        {{~#allParams}}
+        {{~#required}}
+        if (requestParameters.{{paramName}} === null || requestParameters.{{paramName}} === undefined) {
+            throw new Error('Required parameter requestParameters.{{paramName}} was null or undefined when calling {{nickname}}.');
+        }
+        {{~/required}}
+        {{~/allParams}}
+        const queryParameters: runtime.HTTPQuery = { watch: true };
+        {{~#queryParams}}
+        {{~#neq paramName "watch"}}
+        if (requestParameters.{{paramName}} !== undefined) {
+            {{~#isDateTime}}
+            queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+            {{~/isDateTime}}
+            {{~^isDateTime}}
+            {{~#isDate}}
+            queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+            {{~/isDate}}
+            {{~^isDate}}
+            queryParameters['{{baseName}}'] = requestParameters.{{paramName}};
+            {{~/isDate}}
+            {{~/isDateTime}}
+        }
+        {{~/neq}}
+        {{~/queryParams}}
+        const headerParameters: runtime.HTTPHeaders = {};
+        {{~#headerParams}}
+        if (requestParameters.{{paramName}} !== undefined && requestParameters.{{paramName}} !== null) {
+            headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
+        }
+        {{~/headerParams}}
+
+        await this.requestStream<runtime.ItemType<{{{returnType}}}>>({
+            path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
+            method: '{{httpMethod}}',
+            headers: headerParameters,
+            query: queryParameters,
+            {{~#hasBodyParam}}
+            {{~#bodyParam}}
+            {{~#isContainer}}
+            body: requestParameters.{{paramName}},
+            {{~/isContainer}}
+            {{~^isContainer}}
+            {{~^isPrimitiveType}}
+            body: requestParameters.{{paramName}},
+            {{~/isPrimitiveType}}
+            {{~#isPrimitiveType}}
+            body: requestParameters.{{paramName}} as any,
+            {{~/isPrimitiveType}}
+            {{~/isContainer}}
+            {{~/bodyParam}}
+            {{~/hasBodyParam}}
+            signal,
+        }, callback);
+    }
+    {{~/startsWith}}
+
+    /**
+     {{~#notes}}
+     * {{&notes}}
+     {{~/notes~}}
+     {{~#summary~}}
+     * {{&summary}}
+     {{~/summary}}
+     */
+     async {{nickname}}Raw({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request{{/allParams.0}}): Promise<runtime.ApiResponse<{{{returnType}}}>> {
+        {{~#allParams}}
+        {{~#required}}
+        if (requestParameters.{{paramName}} === null || requestParameters.{{paramName}} === undefined) {
+            throw new Error('Required parameter requestParameters.{{paramName}} was null or undefined when calling {{nickname}}.');
+        }
+        {{~/required}}
+        {{~/allParams}}
+        const queryParameters: runtime.HTTPQuery = {};
+        {{~#queryParams}}
+        {{~#neq paramName "watch"}}
+        if (requestParameters.{{paramName}} !== undefined) {
+            {{~#isDateTime}}
+            queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+            {{~/isDateTime}}
+            {{~^isDateTime}}
+            {{~#isDate}}
+            queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+            {{~/isDate}}
+            {{~^isDate}}
+            queryParameters['{{baseName}}'] = requestParameters.{{paramName}};
+            {{~/isDate}}
+            {{~/isDateTime}}
+        }
+        {{~/neq}}
+        {{~/queryParams}}
+        const headerParameters: runtime.HTTPHeaders = {};
+        {{~#headerParams}}
+        if (requestParameters.{{paramName}} !== undefined && requestParameters.{{paramName}} !== null) {
+            headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
+        }
+        {{~/headerParams}}
+
+        const response = await this.request({
+            path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
+            method: '{{httpMethod}}',
+            headers: headerParameters,
+            query: queryParameters,
+            {{~#hasBodyParam}}
+            {{~#bodyParam}}
+            {{~#isContainer}}
+            body: requestParameters.{{paramName}},
+            {{~/isContainer}}
+            {{~^isContainer}}
+            {{~^isPrimitiveType}}
+            body: requestParameters.{{paramName}},
+            {{~/isPrimitiveType}}
+            {{~#isPrimitiveType}}
+            body: requestParameters.{{paramName}} as any,
+            {{~/isPrimitiveType}}
+            {{~/isContainer}}
+            {{~/bodyParam}}
+            {{~/hasBodyParam}}
+        });
+
+        {{~#returnTypeIsPrimitive}}
+        {{~#isMapContainer}}
+        return new runtime.JSONApiResponse<any>(response);
+        {{~/isMapContainer}}
+        {{~#returnSimpleType}}
+        {{~#eq returnType "string"}}
+        return new runtime.StringApiResponse(response);
+        {{~else}}
+        return new runtime.JSONApiResponse<any>(response);
+        {{~/eq}}
+        {{~/returnSimpleType}}
+        {{~/returnTypeIsPrimitive}}
+        {{~^returnTypeIsPrimitive}}
+        return new runtime.JSONApiResponse<any>(response);
+        {{~/returnTypeIsPrimitive}}
+    }
+
+    /**
+     {{~#notes}}
+     * {{&notes}}
+     {{~/notes~}}
+     {{~#summary~}}
+     * {{&summary}}
+     {{~/summary}}
+     */
+    async {{nickname}}({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request{{/allParams.0}}): Promise<{{{returnType}}}> {
+        const response = await this.{{nickname}}Raw({{#allParams.0}}requestParameters{{/allParams.0}});
+        return await response.value();
+    }
+
+    {{/operation}}
+}
+{{~/operations}}
