@@ -33,7 +33,7 @@ not require authentication).
 
 Open the URL with your browser: `http://localhost:3000`
 
-The home page renders all Pods. By default they are rendered by server-side (server-side rendering; SSR). You can check the client-side rendering and API requests by opening `http://localhost:3000/ssr=no`. See the implementation: `src/server.tsx`.
+The home page renders all Pods. By default they are rendered by server-side (server-side rendering; SSR). You can check the client-side rendering and API requests by opening `http://localhost:3000/?ssr=no`. See the implementation: `src/server.tsx`.
 
 ## Razzle Doc
 
