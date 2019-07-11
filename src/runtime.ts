@@ -72,7 +72,7 @@ interface Modules {
   fetch: typeof fetch | undefined
   fetchStream: typeof fetch
   abortController: typeof AbortController | undefined
-  stringDecoder: typeof StringDecoder | undefined
+  stringDecoder: any
 }
 
 export let modules: Modules
@@ -85,7 +85,7 @@ if (process.browser) {
     stringDecoder: undefined
   }
 } else {
-  const nfetch = require('node-fetch')
+  const nfetch = require('node-fetch/lib/index.js').default
   const { StringDecoder } = require('string_decoder')
   modules = {
     fetch: nfetch,
@@ -116,7 +116,7 @@ export class BaseAPI {
     const { input, init } = this.createFetchParams(requestOpts)
     log.debug('request input: %s', input)
     log.debug('request init: %o', init)
-    const response = await (modules.fetch || fetch)(input, init)
+    const response = await (process.browser ? fetch(input, init) : modules.fetch!(input, init))
     if (response.status < 200 || response.status >= 300) {
       log.debug('request error: %o', response)
       throw new Error(`${response.status}: ${response.statusText}`)
@@ -187,7 +187,7 @@ export class BaseAPI {
       }
     } else {
       await new Promise((resolve, reject) => {
-        const decoder = new modules.stringDecoder!('utf8')
+        const decoder = new (modules.stringDecoder as typeof StringDecoder)('utf8')
         response.body.on('data', (chunk: Uint8Array) => {
           callback(decoder.write(chunk))
         })
