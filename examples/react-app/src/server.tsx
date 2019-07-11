@@ -47,7 +47,7 @@ function loadPods(): Promise<V1PodList> {
 app.get('/*', async (req: express.Request, res: express.Response) => {
   const data = req.query.ssr === 'no' ? undefined : await loadPods();
   const markup = renderToString(
-    <StaticRouter location={req.url}>
+    <StaticRouter context={{}} location={req.url}>
       <App />
     </StaticRouter>
   );
