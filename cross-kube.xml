@@ -6,7 +6,7 @@
     <artifactId>cross-kube</artifactId>
     <version>0.1.0</version>
     <name>cross-kube</name>
-    <url>http://cross-kube.local</url>
+    <url>http://github.com/aapf/cross-kube</url>
     <build>
         <plugins>
             <plugin>
@@ -33,13 +33,13 @@
                             <generateModelDocumentation>false</generateModelDocumentation>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <configOptions>
-                                <projectName>kubernetes-typescript-client</projectName>
-                                <projectDescription>Typescript client for Kubernetes.</projectDescription>
+                                <projectName>cross-kube</projectName>
+                                <projectDescription>JavaScript/TypeScript client library for Kubernetes which works with both browsers and Node.js.</projectDescription>
                                 <projectVersion>${generator.client.version}</projectVersion>
-                                <projectLicenseName>UNLICENSED</projectLicenseName>
+                                <projectLicenseName>MIT</projectLicenseName>
                                 <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
                                 <supportsES6>true</supportsES6>
-                                <npmName>kubernetes-client-typescript</npmName>
+                                <npmName>cross-kube</npmName>
                                 <npmVersion>${generator.client.version}</npmVersion>
                                 <withInterfaces>true</withInterfaces>
                             </configOptions>
