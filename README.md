@@ -13,6 +13,10 @@ The following libraries are used internally:
 * in Node.js:
   * [node-fetch](https://www.npmjs.com/package/node-fetch): `fetch()` for Node.js
 
+## Note
+
+**cross-kube is still in alpha stage and has not been published yet.**
+
 ## Usage
 
 ### Importing Models/APIs
@@ -35,9 +39,13 @@ import CoreV1Api from 'cross-kube/lib/apis' // Not recommended
 
 ## Installation
 
+Install cross-kube from the Git repo:
+
 ```sh
-$ npm install cross-kube
+$ npm install git://github.com/aapf/cross-kube.git
 ```
+
+(After cross-kube is published, it will be `npm install cross-kube`.)
 
 You also need the following libraries:
 
