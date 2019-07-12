@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Modifications copyright 2019 NEC Corporation
+
 from __future__ import print_function
 
 import json

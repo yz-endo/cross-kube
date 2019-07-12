@@ -36,7 +36,7 @@
                                 <projectName>kubernetes-typescript-client</projectName>
                                 <projectDescription>Typescript client for Kubernetes.</projectDescription>
                                 <projectVersion>${generator.client.version}</projectVersion>
-                                <projectLicenseName>UNLICENSED</projectLicenseName>
+                                <projectLicenseName>MIT</projectLicenseName>
                                 <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
                                 <supportsES6>true</supportsES6>
                                 <npmName>kubernetes-client-typescript</npmName>
