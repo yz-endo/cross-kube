@@ -166,7 +166,6 @@ api.createNamespacedPod({ namespace: 'default', body: pod }).then(() => { consol
 ```
 
 ## Limitations
-
 Currently cross-kube does not support authentication and loading Kubernetes configuration.
 
 To use cross-kube in front-end, you need a Kubernetes API server which accepts HTTP requests without exchanging authentication data. Launching a proxy (`kubectl proxy -p 4000`) is the easiest way to test cross-kube for now.
@@ -178,3 +177,8 @@ This problem will be solved in the future.
 [MIT](LICENSE)
 
 This software includes the work that is distributed in the Apache License 2.0
+
+## Contributing
+
+We are preparing a CLA(Contributor License Agreement).  
+So, we can not accept Pull request now.
