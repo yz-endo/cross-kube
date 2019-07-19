@@ -4,6 +4,12 @@ const micromatch = require('micromatch')
 module.exports = {
   'src/**/*.ts': (files) => {
     const match = micromatch.not(files, ['**/*.config.ts'])
-    return match.map(file => `prettier --write ${file} && tslint ${file} && git add --patch ${file}`)
+    return [].concat(
+      ...match.map(file => [
+        `prettier --write ${file}`,
+        `tslint ${file}`,
+        `git add ${file}`
+      ])
+    )
   }
 }
