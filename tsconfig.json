@@ -25,7 +25,7 @@
       "node"
     ],
     "plugins": [
-      { "name": "tslint-language-service" }
+      { "name": "typescript-tslint-plugin" }
     ]
   },
   "include": [
