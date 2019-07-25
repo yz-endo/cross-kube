@@ -90,7 +90,7 @@ class Home extends React.Component<{}, HomeState> {
         </ul>
         <div className="Home-example">
           <h2>All Pods</h2>
-          <ul>{this.state.items.map(item => this.renderPod(item))}</ul>
+          <ul>{this.state.items.map((item) => this.renderPod(item))}</ul>
         </div>
       </div>
     );
