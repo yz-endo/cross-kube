@@ -1,9 +1,9 @@
-// @ts-ignore tslint:disable-next-line
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api';
-// @ts-ignore tslint:disable-next-line
-import V1Pod from 'cross-kube/lib/models/V1Pod';
-// @ts-ignore tslint:disable-next-line
-import V1PodList from 'cross-kube/lib/models/V1PodList';
+// @ts-ignore
+import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'; // tslint:disable-line
+// @ts-ignore
+import V1Pod from 'cross-kube/lib/models/V1Pod'; // tslint:disable-line
+// @ts-ignore
+import V1PodList from 'cross-kube/lib/models/V1PodList'; // tslint:disable-line
 import React from 'react';
 import logo from './react.svg';
 
@@ -90,7 +90,7 @@ class Home extends React.Component<{}, HomeState> {
         </ul>
         <div className="Home-example">
           <h2>All Pods</h2>
-          <ul>{this.state.items.map((item) => this.renderPod(item))}</ul>
+          <ul>{this.state.items.map(item => this.renderPod(item))}</ul>
         </div>
       </div>
     );
