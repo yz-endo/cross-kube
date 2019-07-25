@@ -41,15 +41,6 @@
       "pre-commit": "yarn precommit"
     }
   },
-  "lint-staged": {
-    "linters": {
-      "{src,test}/**/*.ts": [
-        "prettier --write",
-        "git add"
-      ]
-    },
-    "ignore": []
-  },
   "dependencies": {
     "abort-controller": "^3.0.0",
     "fetch-readablestream": "^0.2.0",
@@ -58,32 +49,32 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.4",
-    "@types/jest": "^24.0.11",
-    "@types/node": "^11.13.4",
+    "@types/jest": "^24.0.15",
+    "@types/node": "^12.6.8",
     "debug": "^4.1.1",
-    "deepmerge": "^3.3.0",
-    "husky": "^2.5.0",
-    "jest": "^24.7.1",
-    "jest-config": "^24.7.1",
-    "lint-staged": "^8.0.0",
-    "prettier": "^1.14.3",
-    "rimraf": "^2.6.2",
-    "rollup": "^1.10.0",
-    "rollup-plugin-commonjs": "^9.3.4",
+    "deepmerge": "^4.0.0",
+    "husky": "^3.0.0",
+    "jest": "^24.8.0",
+    "jest-config": "^24.8.0",
+    "lint-staged": "^9.2.0",
+    "prettier": "^1.18.2",
+    "rimraf": "^2.6.3",
+    "rollup": "^1.17.0",
+    "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-multi-input": "^1.0.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-multi-input": "^1.0.2",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.20.1",
+    "rollup-plugin-typescript2": "^0.22.0",
     "scripty": "^1.9.1",
     "ts-jest": "^24.0.2",
-    "ts-node": "^8.1.0",
-    "tslint": "^5.15.0",
-    "tslint-config-prettier": "^1.15.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1",
-    "tslint-language-service": "^0.9.9",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.4.1"
+    "typescript": "^3.5.3",
+    "typescript-tslint-plugin": "^0.5.4"
   }
 }

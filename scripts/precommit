@@ -1,5 +1,15 @@
 #!/bin/bash -eu
 
 lint-staged
-yarn lint
 yarn test
+yarn audit
+
+yarn build
+
+(
+    cd examples/react-app
+    yarn
+    yarn link cross-kube
+    CI=true SKIP_PREFLIGHT_CHECK=true yarn test
+    yarn audit
+)

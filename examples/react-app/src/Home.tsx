@@ -1,9 +1,9 @@
-  // tslint:disable-next-line
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api';
-  // tslint:disable-next-line
-import V1Pod from 'cross-kube/lib/models/V1Pod';
-  // tslint:disable-next-line
-import V1PodList from 'cross-kube/lib/models/V1PodList';
+// @ts-ignore
+import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'; // tslint:disable-line
+// @ts-ignore
+import V1Pod from 'cross-kube/lib/models/V1Pod'; // tslint:disable-line
+// @ts-ignore
+import V1PodList from 'cross-kube/lib/models/V1PodList'; // tslint:disable-line
 import React from 'react';
 import logo from './react.svg';
 
