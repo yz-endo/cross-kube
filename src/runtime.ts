@@ -297,7 +297,7 @@ function defaultHTTPHeaders(method: string): HTTPHeaders {
 
 export function mergeRequestOpts(...requestOptsArray: Partial<RequestOpts>[]): RequestOpts {
   const headers = requestOptsArray.reduce(
-    (acc: HTTPHeaders, opts: Partial<RequestOpts>) => Object.assign({}, acc, opts.headers || {}),
+    (acc: HTTPHeaders, opts: Partial<RequestOpts>) => ({ ...acc, ...(opts.headers || {}) }),
     {}
   )
   const merged = Object.assign({ basePath: DEFAULT_BASE_PATH }, ...requestOptsArray, { headers })
@@ -328,7 +328,7 @@ function createFetchParams(requestOpts: RequestOpts): FetchParams {
   const body = JSON.stringify(requestOpts.body)
   const init = {
     method: requestOpts.method,
-    headers: Object.assign({}, defaultHTTPHeaders(requestOpts.method), requestOpts.headers),
+    headers: { ...defaultHTTPHeaders(requestOpts.method), ...requestOpts.headers },
     body,
     signal: requestOpts.signal
   }
