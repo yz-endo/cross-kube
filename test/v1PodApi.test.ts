@@ -1,23 +1,28 @@
 import AbortController from 'abort-controller'
 import V1Pod from '../src/models/V1Pod'
 import V1Namespace from '../src/models/V1Namespace'
-import CoreV1Api from '../src/apis/CoreV1Api'
+import {
+  createNamespace,
+  deleteNamespace,
+  listNamespacedPod,
+  createNamespacedPod,
+  readNamespacedPod,
+  patchNamespacedPod,
+  replaceNamespacedPod,
+  deleteNamespacedPod,
+  watchListNamespacedPod
+} from '../src/apis/CoreV1Api'
 import { KubeEvent } from '../src/runtime'
-import { sleep, podManifest } from './helper'
+import { defaultRequestOpts, sleep, podManifest } from './helper'
 
-jest.setTimeout(30000)
-
-const apiUrl = process.env.KUBE_API_SERVER || 'http://localhost:4000'
+jest.setTimeout(120000)
 
 const testNamespace = 'cross-kube-test-v1pod'
 
 describe('V1Pod API', () => {
-  let api: CoreV1Api
-
   beforeAll(async () => {
-    api = new CoreV1Api(apiUrl)
     try {
-      await api.deleteNamespace({ name: testNamespace })
+      await deleteNamespace({ name: testNamespace }, defaultRequestOpts)
       // Wait until the namespace is deleted
       await sleep(10000)
     } catch (e) {
@@ -29,7 +34,7 @@ describe('V1Pod API', () => {
           name: testNamespace
         }
       }
-      await api.createNamespace({ body: namespace })
+      await createNamespace({ body: namespace }, defaultRequestOpts)
       await sleep(3000)
     } catch (e) {
       console.error(e)
@@ -37,11 +42,11 @@ describe('V1Pod API', () => {
   })
 
   afterAll(async () => {
-    await api.deleteNamespace({ name: testNamespace })
+    await deleteNamespace({ name: testNamespace }, defaultRequestOpts)
   })
 
   it('lists Pods', async () => {
-    const res = await api.listNamespacedPod({ namespace: testNamespace })
+    const res = await listNamespacedPod({ namespace: testNamespace }, defaultRequestOpts)
     expect(res.kind).toEqual('PodList')
     expect(res.apiVersion).toEqual('v1')
     expect(res.metadata).toBeDefined()
@@ -52,10 +57,13 @@ describe('V1Pod API', () => {
 
   it('creates, reads, patches, replaces and deletes Pods', async () => {
     const pod1 = podManifest()
-    const created = await api.createNamespacedPod({
-      namespace: testNamespace,
-      body: pod1
-    })
+    const created = await createNamespacedPod(
+      {
+        namespace: testNamespace,
+        body: pod1
+      },
+      defaultRequestOpts
+    )
 
     expect(created.kind).toEqual('Pod')
     expect(created.apiVersion).toEqual('v1')
@@ -64,69 +72,103 @@ describe('V1Pod API', () => {
     expect(created.metadata!.selfLink).toEqual(`/api/v1/namespaces/${testNamespace}/pods/pod-1`)
     expect(created.spec).toBeDefined()
 
-    const read = await api.readNamespacedPod({
-      namespace: testNamespace,
-      name: 'pod-1'
-    })
+    const read = await readNamespacedPod(
+      {
+        namespace: testNamespace,
+        name: 'pod-1'
+      },
+      defaultRequestOpts
+    )
     expect(read.metadata!.name).toEqual('pod-1')
     expect(read.spec!.containers![0].name).toEqual(created.spec!.containers![0].name)
     expect(read.status).toBeDefined()
 
     await sleep(3000)
 
-    const patched = await api.patchNamespacedPod({
-      namespace: testNamespace,
-      name: 'pod-1',
-      body: {
-        metadata: {
-          labels: {
-            patched: 'true'
+    const patched = await patchNamespacedPod(
+      {
+        namespace: testNamespace,
+        name: 'pod-1',
+        body: {
+          metadata: {
+            labels: {
+              patched: 'true'
+            }
           }
         }
-      }
-    })
-    expect(read.metadata!.name).toEqual('pod-1')
+      },
+      defaultRequestOpts
+    )
+    expect(patched.metadata!.name).toEqual('pod-1')
     expect(patched.metadata!.labels!['patched']).toEqual('true')
 
     await sleep(1000)
 
-    const replaced = await api.patchNamespacedPod({
-      namespace: testNamespace,
-      name: 'pod-1',
-      body: podManifest({
-        metadata: {
-          labels: {
-            replaced: 'true'
-          }
-        }
-      })
-    })
-    expect(read.metadata!.name).toEqual('pod-1')
-    expect(replaced.metadata!.labels!['replaced']).toEqual('true')
+    const replaced = await replaceNamespacedPod(
+      {
+        namespace: testNamespace,
+        name: 'pod-1',
+        body: Object.assign({}, patched, {
+          spec: Object.assign({}, patched.spec, {
+            activeDeadlineSeconds: 100
+          })
+        })
+      },
+      defaultRequestOpts
+    )
+    expect(replaced.metadata!.name).toEqual('pod-1')
+    expect(replaced.spec!.activeDeadlineSeconds).toEqual(100)
 
     await sleep(1000)
 
-    await api.deleteNamespacedPod({ namespace: testNamespace, name: replaced.metadata!.name! })
+    await deleteNamespacedPod(
+      { namespace: testNamespace, name: replaced.metadata!.name! },
+      defaultRequestOpts
+    )
 
-    await sleep(3000)
+    let err: Error | undefined = undefined
+    for (let i = 0; i < 40; i++) {
+      await sleep(2000)
+      try {
+        await readNamespacedPod(
+          {
+            namespace: testNamespace,
+            name: 'pod-1'
+          },
+          defaultRequestOpts
+        )
+      } catch (e) {
+        err = e
+        break
+      }
+    }
+    expect(err).toBeInstanceOf(Error)
+    expect(err!.toString()).toMatch(/404: Not Found/)
 
-    await expect(
-      api.readNamespacedPod({
-        namespace: testNamespace,
-        name: 'pod-1'
-      })
-    ).rejects.toThrow(/404: Not Found/)
+    try {
+      await readNamespacedPod(
+        {
+          namespace: testNamespace,
+          name: 'pod-1'
+        },
+        defaultRequestOpts
+      )
+    } catch (err) {
+      expect(err.status).toEqual(404)
+      expect(err.statusText).toEqual('Not Found')
+    }
   })
 
   it('watches Pod events', async () => {
     const ac = new AbortController()
     const events: KubeEvent<V1Pod>[] = []
-    const watchPromise = api.watchListNamespacedPod(
+    const watchPromise = watchListNamespacedPod(
       { namespace: testNamespace },
       event => {
         events.push(event)
       },
-      ac.signal
+      defaultRequestOpts,
+      { signal: ac.signal }
     )
 
     await sleep(100)
@@ -134,10 +176,13 @@ describe('V1Pod API', () => {
     expect(events).toHaveLength(0)
 
     const pod1 = podManifest()
-    await api.createNamespacedPod({
-      namespace: testNamespace,
-      body: pod1
-    })
+    await createNamespacedPod(
+      {
+        namespace: testNamespace,
+        body: pod1
+      },
+      defaultRequestOpts
+    )
 
     await sleep(20000)
 

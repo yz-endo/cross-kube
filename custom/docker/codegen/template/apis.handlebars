@@ -1,0 +1,201 @@
+// tslint:disable
+{{>licenseInfo}}
+
+import {
+    RequestOpts,
+    HTTPHeaders,
+    HTTPQuery,
+    ApiResponse,
+    StringApiResponse,
+    JSONApiResponse,
+    ItemType,
+    KubeEvent,
+    request,
+    requestStream
+} from 'cross-kube/lib/runtime';
+{{~#imports}}
+import {{className}} from '../models/{{className}}';
+{{~/imports}}
+
+{{#operations}}
+{{~#operation}}
+{{~#allParams.0}}
+interface {{operationIdCamelCase}}Request {
+    {{~#allParams}}
+    {{~#neq paramName "watch"}}
+    {{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}};
+    {{~/neq}}
+    {{~/allParams}}
+}
+
+{{/allParams.0}}
+{{~/operation}}
+{{~/operations}}
+{{~#operations}}
+
+{{~#operation}}
+{{~#startsWith nickname "list"}}
+/**
+ {{~#notes}}
+ * {{&notes}}
+ {{~/notes~}}
+ {{~#summary~}}
+ * {{&summary}}
+ {{~/summary}}
+ */
+ export async function watch{{operationIdCamelCase}}({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request{{/allParams.0}}, callback: (event: KubeEvent<ItemType<{{{returnType}}}>>) => void, ...requestOptsArray: Partial<RequestOpts>[]): Promise<void> {
+    {{~#allParams}}
+    {{~#required}}
+    if (requestParameters.{{paramName}} === null || requestParameters.{{paramName}} === undefined) {
+        throw new Error('Required parameter requestParameters.{{paramName}} was null or undefined when calling {{nickname}}.');
+    }
+    {{~/required}}
+    {{~/allParams}}
+    const queryParameters: HTTPQuery = { watch: true };
+    {{~#queryParams}}
+    {{~#neq paramName "watch"}}
+    if (requestParameters.{{paramName}} !== undefined) {
+        {{~#isDateTime}}
+        queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+        {{~/isDateTime}}
+        {{~^isDateTime}}
+        {{~#isDate}}
+        queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+        {{~/isDate}}
+        {{~^isDate}}
+        queryParameters['{{baseName}}'] = requestParameters.{{paramName}};
+        {{~/isDate}}
+        {{~/isDateTime}}
+    }
+    {{~/neq}}
+    {{~/queryParams}}
+    const headerParameters: HTTPHeaders = {};
+    {{~#headerParams}}
+    if (requestParameters.{{paramName}} !== undefined && requestParameters.{{paramName}} !== null) {
+        headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
+    }
+    {{~/headerParams}}
+
+    await requestStream<ItemType<{{{returnType}}}>>(callback, {
+        path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
+        method: '{{httpMethod}}',
+        headers: headerParameters,
+        query: queryParameters,
+        {{~#hasBodyParam}}
+        {{~#bodyParam}}
+        {{~#isContainer}}
+        body: requestParameters.{{paramName}},
+        {{~/isContainer}}
+        {{~^isContainer}}
+        {{~^isPrimitiveType}}
+        body: requestParameters.{{paramName}},
+        {{~/isPrimitiveType}}
+        {{~#isPrimitiveType}}
+        body: requestParameters.{{paramName}} as any,
+        {{~/isPrimitiveType}}
+        {{~/isContainer}}
+        {{~/bodyParam}}
+        {{~/hasBodyParam}}
+    }, ...requestOptsArray);
+}
+{{~/startsWith}}
+
+/**
+ {{~#notes}}
+ * {{&notes}}
+ {{~/notes~}}
+ {{~#summary~}}
+ * {{&summary}}
+ {{~/summary}}
+ */
+ export async function {{nickname}}Raw({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request, {{/allParams.0}}...requestOptsArray: Partial<RequestOpts>[]): Promise<ApiResponse<{{{returnType}}}>> {
+    {{~#allParams}}
+    {{~#required}}
+    if (requestParameters.{{paramName}} === null || requestParameters.{{paramName}} === undefined) {
+        throw new Error('Required parameter requestParameters.{{paramName}} was null or undefined when calling {{nickname}}.');
+    }
+    {{~/required}}
+    {{~/allParams}}
+    const queryParameters: HTTPQuery = {};
+    {{~#queryParams}}
+    {{~#neq paramName "watch"}}
+    if (requestParameters.{{paramName}} !== undefined) {
+        {{~#isDateTime}}
+        queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+        {{~/isDateTime}}
+        {{~^isDateTime}}
+        {{~#isDate}}
+        queryParameters['{{baseName}}'] = (requestParameters.{{paramName}} as any).toISOString();
+        {{~/isDate}}
+        {{~^isDate}}
+        queryParameters['{{baseName}}'] = requestParameters.{{paramName}};
+        {{~/isDate}}
+        {{~/isDateTime}}
+    }
+    {{~/neq}}
+    {{~/queryParams}}
+    const headerParameters: HTTPHeaders = {};
+    {{~#headerParams}}
+    if (requestParameters.{{paramName}} !== undefined && requestParameters.{{paramName}} !== null) {
+        headerParameters['{{baseName}}'] = String(requestParameters.{{paramName}});
+    }
+    {{~/headerParams}}
+    {{~#eq httpMethod "PATCH"}}
+        headerParameters['Content-Type'] = 'application/merge-patch+json';
+    {{~/eq}}
+
+    const response = await request({
+        path: `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, encodeURIComponent(String(requestParameters.{{paramName}}))){{/pathParams}},
+        method: '{{httpMethod}}',
+        headers: headerParameters,
+        query: queryParameters,
+        {{~#hasBodyParam}}
+        {{~#bodyParam}}
+        {{~#isContainer}}
+        body: requestParameters.{{paramName}},
+        {{~/isContainer}}
+        {{~^isContainer}}
+        {{~^isPrimitiveType}}
+        body: requestParameters.{{paramName}},
+        {{~/isPrimitiveType}}
+        {{~#isPrimitiveType}}
+        body: requestParameters.{{paramName}} as any,
+        {{~/isPrimitiveType}}
+        {{~/isContainer}}
+        {{~/bodyParam}}
+        {{~/hasBodyParam}}
+    }, ...requestOptsArray);
+
+    {{~#returnTypeIsPrimitive}}
+    {{~#isMapContainer}}
+    return new JSONApiResponse<any>(response);
+    {{~/isMapContainer}}
+    {{~#returnSimpleType}}
+    {{~#eq returnType "string"}}
+    return new StringApiResponse(response);
+    {{~else}}
+    return new JSONApiResponse<any>(response);
+    {{~/eq}}
+    {{~/returnSimpleType}}
+    {{~/returnTypeIsPrimitive}}
+    {{~^returnTypeIsPrimitive}}
+    return new JSONApiResponse<any>(response);
+    {{~/returnTypeIsPrimitive}}
+}
+
+/**
+ {{~#notes}}
+ * {{&notes}}
+ {{~/notes~}}
+ {{~#summary~}}
+ * {{&summary}}
+ {{~/summary}}
+ */
+export async function {{nickname}}({{#allParams.0}}requestParameters: {{operationIdCamelCase}}Request, {{/allParams.0}}...requestOptsArray: Partial<RequestOpts>[]): Promise<{{{returnType}}}> {
+    const response = await {{nickname}}Raw({{#allParams.0}}requestParameters, {{/allParams.0}}...requestOptsArray);
+    return await response.value();
+}
+
+{{/operation}}
+
+{{~/operations}}

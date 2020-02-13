@@ -1,5 +1,5 @@
   // tslint:disable-next-line
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api';
+import { listPodForAllNamespaces } from 'cross-kube/lib/apis/CoreV1Api';
   // tslint:disable-next-line
 import V1PodList from 'cross-kube/lib/models/V1PodList';
 import express from 'express';
@@ -40,8 +40,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.static(process.env.RAZZLE_PUBLIC_DIR!));
 
 function loadPods(): Promise<V1PodList> {
-  const api = new CoreV1Api('http://localhost:3000');
-  return api.listPodForAllNamespaces({});
+  return listPodForAllNamespaces({}, { basePath: 'http://localhost:3000' });
 }
 
 app.get('/*', async (req: express.Request, res: express.Response) => {

@@ -1,10 +1,10 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import multiinput from 'rollup-plugin-multi-input'
 import sourcemaps from 'rollup-plugin-sourcemaps'
 import typescript from 'rollup-plugin-typescript2'
-import json from 'rollup-plugin-json'
-import replace from 'rollup-plugin-replace'
+import json from '@rollup/plugin-json'
+import replace from '@rollup/plugin-replace'
 
 const pkg = require('./package.json')
 const external = [...Object.keys(pkg.peerDependencies || {}), 'debug']
@@ -16,6 +16,8 @@ const plugins = [
   resolve(),
   typescript({
     useTsconfigDeclarationDir: true,
+    objectHashIgnoreUnknownHack: true,
+    clean: true,
     verbosity: 2
   }),
   commonjs(),
@@ -24,7 +26,7 @@ const plugins = [
 
 export default [
   {
-    input: ['src/**/*.ts'],
+    input: ['src/*.ts', 'src/{models,apis}/*.ts'],
     output: {
       dir: 'lib',
       format: 'esm',

@@ -23,18 +23,17 @@ The following libraries are used internally:
 
 cross-kube provides only ES modules which will normally be processed by bundlers (Webpack, Rollup.js, etc.) or TypeScript compiler (tsc). If you would like to import cross-kube directly from browsers or Node.js, edit [rollup.config.ts](rollup.config.ts) to generate a UMD or CJS bundle by executing `yarn build` manually.
 
-It is recommended to import individual modules under `src/models/` and `src/apis/` to avoid increasing the JavaScript bundle size.
-
-Examples:
+cross-kube provides individual model and API modules under `lib/` directory. They can be imported as:
 
 ```ts
-import V1Pod from 'cross-kube/lib/models/V1Pod' // Recommended
+import V1Pod from 'cross-kube/lib/models/V1Pod'
+import { createNamespace } from 'cross-kube/lib/apis/CoreV1Api'
+```
 
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api' // Recommended
+Other common types and classes can be imported from the top module:
 
-import V1Pod from 'cross-kube/lib/models' // Not recommended
-
-import CoreV1Api from 'cross-kube/lib/apis' // Not recommended
+```ts
+import { RequestOpts, ApiResponse } from 'cross-kube'
 ```
 
 ## Installation
@@ -57,10 +56,11 @@ You also need the following libraries:
 ### List all pods
 
 ```ts
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'
+import { listNamespacedPod } from 'cross-kube/lib/apis/CoreV1Api'
 
-const api = new CoreV1Api('http://localhost:4000')
-api.listNamespacedPod({ namespace: 'default' }).then(podList => {
+const reqOpts = { basePath: 'http://localhost:4000' }
+
+listNamespacedPod({ namespace: 'default' }, reqOpts).then(podList => {
   console.log(podList)
 })
 ```
@@ -70,16 +70,16 @@ api.listNamespacedPod({ namespace: 'default' }).then(podList => {
 Watch methods receives HTTP 1.1 chunks from Kubernetes API and invoke a callback function for each event.
 
 ```ts
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'
+import { watchListNamespacedPod } from 'cross-kube/lib/apis/CoreV1Api'
 // import AbortController from 'abort-controller' // Node.js requires this
 
-const api = new CoreV1Api('http://localhost:4000')
+const reqOpts = { basePath: 'http://localhost:4000' }
 const ac = new AbortController()
 
 // Receive events until receiving an abort signal or server-side timeout
-api.watchNamespacedPod({ namespace: 'default', signal: ac.signal }, event => {
+watchListNamespacedPod({ namespace: 'default' }, event => {
   console.log(event)
-}).then(() => ({}))
+}, reqOpts, { signal: ac.signal }).then(() => ({}))
 
 // Abort after 10 seconds
 setTimeout(() => {
@@ -91,17 +91,18 @@ setTimeout(() => {
 
 ```ts
 import V1Namespace from 'cross-kube/lib/models/V1Namespace'
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'
+import { createNamespace } from 'cross-kube/lib/apis/CoreV1Api'
 
-const api = new CoreV1Api('http://localhost:4000')
+const reqOpts = { basePath: 'http://localhost:4000' }
+
 const namespace: V1Namespace = {
   metadata: {
     name: 'test'
   }
 }
-api.createNamespace({ body: namespace }).then((res => {
+createNamespace({ body: namespace }, reqOpts).then((res => {
   console.log('Created namespace', res)
-})
+}, reqOpts)
 ```
 
 ## Polyfills
@@ -157,12 +158,15 @@ TypeScript code:
 
 ```ts
 import V1Pod from 'cross-kube/lib/models/V1Pod'
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'
+import { createNamespacedPod } from 'cross-kube/lib/apis/CoreV1Api'
 import podTemplate from './pod.yaml'
 
-const api = CoreV1Api('http://localhost:4000')
+const reqOpts = { basePath: 'http://localhost:4000' }
+
 const pod = podTemplate({ name: 'example', sleep: 600 }) as V1Pod
-api.createNamespacedPod({ namespace: 'default', body: pod }).then(() => { console.log('done') })
+createNamespacedPod({ namespace: 'default', body: pod }, reqOpts).then(pod => {
+  console.log('done', pod)
+})
 ```
 
 ## Limitations

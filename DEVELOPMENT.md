@@ -138,3 +138,27 @@ Here is an extracted part of `package.json`:
 ```
 
 `src/index.all.ts` is only required to generate this `index.all.d.ts`.
+
+## Examples
+
+There is a React example app in `examples/react-app`.
+
+You need to link `cross-kube` and `react-app` before launching it.
+
+```sh
+$ yarn local-link
+$ cd examples/react-app
+$ yarn
+```
+
+Launch Kubernetes API proxy with port 4000:
+
+```sh
+$ kubectl proxy -p 4000
+```
+
+Start the dev-server:
+
+```sh
+$ yarn start
+```

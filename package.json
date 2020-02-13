@@ -18,9 +18,20 @@
     "./lib/runtime.js": "./lib/browser/runtime.js"
   },
   "types": "./lib/index.all.d.ts",
+  "bin": {
+    "cross-kube": "./bin/cross-kube.js"
+  },
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "cross-kube",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
   "files": [
-    "src",
-    "lib"
+    "bin",
+    "lib",
+    "src"
   ],
   "engines": {
     "node": ">=8"
@@ -29,52 +40,64 @@
     "clean": "scripty",
     "codegen": "scripty",
     "build": "scripty",
+    "build:lib": "scripty",
+    "build:command": "scripty",
     "test": "scripty",
     "lint": "scripty",
-    "precommit": "scripty"
+    "precommit": "scripty",
+    "local-link": "scripty",
+    "local-unlink": "scripty"
   },
   "scripty": {
     "silent": true
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn precommit"
-    }
-  },
   "dependencies": {
+    "@oclif/command": "^1.5.19",
+    "@oclif/config": "^1.13.3",
+    "@oclif/plugin-help": "^2.2.3",
     "abort-controller": "^3.0.0",
     "fetch-readablestream": "^0.2.0",
+    "mkdirp": "^0.5.1",
     "node-fetch": "^2.6.0",
-    "query-string": "^6.8.1"
+    "query-string": "^6.9.0",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.4",
-    "@types/jest": "^24.0.15",
-    "@types/node": "^12.6.8",
+    "@kubernetes/client-node": "^0.11.0",
+    "@oclif/dev-cli": "^1.22.2",
+    "@rollup/plugin-commonjs": "^11.0.1",
+    "@rollup/plugin-json": "^4.0.1",
+    "@rollup/plugin-node-resolve": "^6.1.0",
+    "@rollup/plugin-replace": "^2.3.0",
+    "@types/debug": "^4.1.5",
+    "@types/jest": "^24.0.25",
+    "@types/js-yaml": "^3.12.1",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^13.1.4",
+    "@types/node-fetch": "^2.5.4",
+    "@types/rimraf": "^2.0.3",
     "debug": "^4.1.1",
-    "deepmerge": "^4.0.0",
-    "husky": "^3.0.0",
-    "jest": "^24.8.0",
-    "jest-config": "^24.8.0",
-    "lint-staged": "^9.2.0",
-    "prettier": "^1.18.2",
-    "rimraf": "^2.6.3",
-    "rollup": "^1.17.0",
-    "rollup-plugin-commonjs": "^10.0.1",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-multi-input": "^1.0.2",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.22.0",
+    "deepmerge": "^4.2.2",
+    "https-proxy-agent": "^4.0.0",
+    "husky": "^3.1.0",
+    "jest": "^24.9.0",
+    "jest-config": "^24.9.0",
+    "js-yaml": "^3.13.1",
+    "lint-staged": "^9.5.0",
+    "prettier": "^1.19.1",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.28.0",
+    "rollup-plugin-multi-input": "^1.0.3",
+    "rollup-plugin-sourcemaps": "^0.5.0",
+    "rollup-plugin-typescript2": "^0.25.3",
     "scripty": "^1.9.1",
-    "ts-jest": "^24.0.2",
-    "ts-node": "^8.3.0",
-    "tslint": "^5.18.0",
+    "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4",
+    "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
-    "tslint-config-standard": "^8.0.1",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.5.3",
-    "typescript-tslint-plugin": "^0.5.4"
+    "tslint-config-standard": "^9.0.0",
+    "tslint-plugin-prettier": "^2.1.0",
+    "typescript": "^3.7.5",
+    "typescript-tslint-plugin": "^0.5.5"
   }
 }
