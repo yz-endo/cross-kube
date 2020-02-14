@@ -249,25 +249,31 @@ async function requestChunks(
   if (process.browser) {
     const reader = response.body.getReader() // Some browsers require polyfill for this
     const decoder = new TextDecoder('utf-8')
-    while (true) {
-      try {
-        const { done, value } = await reader.read()
-        if (value) {
-          callback(decoder.decode(value))
-        }
-        if (done) {
-          break
-        }
-      } catch (e) {
+
+    let closed = false
+    reader.closed
+      .then(() => {
+        closed = true
+      })
+      .catch(err => {
         if (
-          `${e}` === 'TypeError: The expression cannot be converted to return the specified type.'
+          `${err}` === 'TypeError: The expression cannot be converted to return the specified type.'
         ) {
-          // Firefox throws this exception
+          // Firefox throws this after the chunk is successfully read
           log.warn('Catch TypeError on reading response from `%s`; continue', input)
-          break
         } else {
-          throw e
+          console.error(err)
         }
+        closed = true
+      })
+
+    while (!closed) {
+      const { done, value } = await reader.read()
+      if (value) {
+        callback(decoder.decode(value))
+      }
+      if (done) {
+        break
       }
     }
   } else {
