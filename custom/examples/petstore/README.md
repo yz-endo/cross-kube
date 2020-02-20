@@ -21,7 +21,7 @@ $ cross-kube codegen
 If you use an HTTP proxy specify `--proxy <proxy-server-url>`
 
 ```sh
-$ cross-kube --proxy http://proxy.example.com:8080 codegen
+$ cross-kube codegen --proxy http://proxy.example.com:8080
 ```
 
 ## Creating CRD
