@@ -9,14 +9,15 @@ PACKAGE_NAME="custom-api"
 echo "swagger file ${SWAGGER_YAML}"
 echo "output directory ${OUTPUT_DIR}"
 
-if [ "x${HTTP_PROXY}" = "x" ]; then
+if [ -z "${HTTP_PROXY}" ]; then
     cat >/tmp/settings.xml <<EOM
 <settings>
   <localRepository>/tmp/m2</localRepository>
 </settings>
 EOM
 else
-    hostport=${HTTP_PROXY//*:\/\//}
+    proto=${HTTP_PROXY%%://*}
+    hostport=${HTTP_PROXY#*://}
     host=${hostport%%:*}
     port=${hostport#*:}
     cat >/tmp/settings.xml <<EOM
@@ -25,7 +26,7 @@ else
   <proxies>
     <proxy>
       <active>true</active>
-      <protocol>http</protocol>
+      <protocol>${proto}</protocol>
       <host>${host}</host>
       <port>${port}</port>
     </proxy>

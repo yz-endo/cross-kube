@@ -22,7 +22,7 @@ export default class Codegen extends BaseCommand {
     }),
     proxy: flags.string({
       char: 'P',
-      description: 'HTTP proxy server (e.g. http://proxy.example.com:8080)'
+      description: 'HTTP proxy server (available format: `<protocol>://<host>:<port>`)'
     }),
     branch: flags.string({
       char: 'b',
