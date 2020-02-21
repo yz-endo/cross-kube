@@ -31,7 +31,8 @@
   "files": [
     "bin",
     "lib",
-    "src"
+    "src",
+    "custom/docker"
   ],
   "engines": {
     "node": ">=8"
