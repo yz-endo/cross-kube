@@ -1,5 +1,5 @@
 // @ts-ignore
-import CoreV1Api from 'cross-kube/lib/apis/CoreV1Api'; // tslint:disable-line
+import { listPodForAllNamespaces } from 'cross-kube/lib/apis/CoreV1Api'; // tslint:disable-line
 // @ts-ignore
 import V1Pod from 'cross-kube/lib/models/V1Pod'; // tslint:disable-line
 // @ts-ignore
@@ -43,8 +43,7 @@ class Home extends React.Component<{}, HomeState> {
       });
       delete window.__SSR_DATA__;
     } else {
-      const api = new CoreV1Api('http://localhost:3000');
-      api.listPodForAllNamespaces({}).then(
+      listPodForAllNamespaces({}, { basePath: 'http://localhost:3000' }).then(
         (podList: V1PodList) => {
           this.setState({
             error: undefined,

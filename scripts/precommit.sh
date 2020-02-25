@@ -8,8 +8,8 @@ yarn build
 
 (
     cd examples/react-app
-    yarn
     yarn link cross-kube
+    yarn
     CI=true SKIP_PREFLIGHT_CHECK=true yarn test
     yarn audit
 )

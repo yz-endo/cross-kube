@@ -1,0 +1,69 @@
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>group.example.com</groupId>
+    <artifactId>custom-api</artifactId>
+    <version>0.1.0</version>
+    <name>custom-api</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${generator.spec.path}</inputSpec>
+                            <generatorName>typescript-fetch</generatorName>
+                            <gitUserId>kubernetes-client</gitUserId>
+                            <gitRepoId>typescript</gitRepoId>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <engine>handlebars</engine>
+                            <output>${generator.output.path}</output>
+                            <templateDirectory>${generator.template.path}</templateDirectory>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <projectName>custom-api</projectName>
+                                <projectDescription>Custom API</projectDescription>
+                                <projectVersion>${generator.client.version}</projectVersion>
+                                <projectLicenseName>UNLICENSED</projectLicenseName>
+                                <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
+                                <supportsES6>true</supportsES6>
+                                <npmName></npmName>
+                                <npmVersion>${generator.client.version}</npmVersion>
+                                <withInterfaces>true</withInterfaces>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <!-- dependencies are needed for the client being generated -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger-annotations-version}</version>
+        </dependency>
+    </dependencies>
+    <properties>
+        <swagger-annotations-version>1.5.0</swagger-annotations-version>
+        <maven-plugin-version>1.0.0</maven-plugin-version>
+        <!-- Default values for the generator parameters. -->
+        <generator.output.path>.</generator.output.path>
+        <generator.spec.path>swagger.json</generator.spec.path>
+        <generator.package.name>client</generator.package.name>
+        <generator.client.version>0.1.0</generator.client.version>
+    </properties>
+</project>
+

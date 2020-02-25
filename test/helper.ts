@@ -1,6 +1,10 @@
 import * as deepmerge from 'deepmerge'
 import V1Pod from '../src/models/V1Pod'
 
+export const defaultRequestOpts = {
+  basePath: process.env.KUBE_API_SERVER || 'http://localhost:4000'
+}
+
 export type NestedPartial<T> =
   | { [K in keyof T]?: T[K] extends Array<infer R> ? Array<NestedPartial<R>> : NestedPartial<T[K]> }
   | T

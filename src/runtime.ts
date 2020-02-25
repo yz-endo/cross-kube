@@ -1,239 +1,11 @@
 import * as querystring from 'query-string'
 import logging from './logging'
 
-const log = {
-  debug: logging('cross-kube:runtime:debug')
-}
-
-/**
- * Base class of Kubernetes objects
- */
-export interface KubeObject {
-  apiVersion?: string
-  kind?: string
-  metadata?: {
-    namespace?: string
-    name?: string
-    resourceVersion?: string
-    uid?: string
-  }
-}
-
-/**
- * Base class of Kubernetes list object
- */
-export interface KubeList<T extends KubeObject> extends KubeObject {
-  items: Array<T>
-}
-
-/**
- * Kubernetes event type
- */
-export enum KubeEventType {
-  Added = 'ADDED',
-  Modified = 'MODIFIED',
-  Deleted = 'DELETED'
-}
-
-/**
- * Kubernetes event
- */
-export interface KubeEvent<T extends KubeObject> {
-  type: KubeEventType
-  object: T
-}
-
 export const DEFAULT_BASE_PATH = 'http://localhost:8080'
 
-// `process.browser` is a flag to distinguish two environments: browser/nodejs
-// It will be replaced by Rollup.js to true or false
-declare var process: {
-  browser: boolean
-}
-
-// `Modules` is required to store platform-dependent library objects
-//
-// Example:
-//   let modules: Modules = {
-//     fetch: process.browser ? undefined : require('node-fetch')
-//   }
-//
-// The above code will be transpiled into two ESM files:
-//
-// lib/browser/runtime.js (for browsers):
-//   let modules = {
-//     fetch: undefined
-//   }
-// lib/runtime.js (for Node.js):
-//   let modules = {
-//     fetch: require('node-fetch')
-//   }
-interface Modules {
-  fetch: typeof fetch | undefined
-  fetchStream: typeof fetch
-  abortController: typeof AbortController | undefined
-  stringDecoder: any
-}
-
-export let modules: Modules
-
-if (process.browser) {
-  modules = {
-    fetch: undefined,
-    fetchStream: require('fetch-readablestream'),
-    abortController: 'AbortController' in window ? AbortController : undefined,
-    stringDecoder: undefined
-  }
-} else {
-  const nfetch = require('node-fetch/lib/index.js').default
-  const { StringDecoder } = require('string_decoder')
-  modules = {
-    fetch: nfetch,
-    fetchStream: nfetch,
-    abortController: require('abort-controller'),
-    stringDecoder: StringDecoder
-  }
-}
-
-/**
- * Base class of Kubernetes APIs
- */
-export class BaseAPI {
-  /**
-   * Constructs the API client.
-   *
-   * @param configParams - Configuration parameters
-   */
-  constructor(public basePath: string = DEFAULT_BASE_PATH) {}
-
-  /**
-   * Sends an API request and gets the response.
-   *
-   * @param requestOpts - API request options
-   * @returns API response
-   */
-  protected async request(requestOpts: RequestOpts): Promise<Response> {
-    const { input, init } = this.createFetchParams(requestOpts)
-    log.debug('request input: %s', input)
-    log.debug('request init: %o', init)
-    const response = await (process.browser ? fetch(input, init) : modules.fetch!(input, init))
-    if (response.status < 200 || response.status >= 300) {
-      log.debug('request error: %o', response)
-      throw new Error(`${response.status}: ${response.statusText}`)
-    }
-    return response
-  }
-
-  /**
-   * Sends an API request and calls the callback function on each receiving event.
-   *
-   * @param requestOpts - API request options
-   * @param callback - Callback function for each event
-   */
-  protected async requestStream<T>(
-    requestOpts: RequestOpts,
-    callback: (event: KubeEvent<T>) => void
-  ): Promise<void> {
-    // JSON boundary is '\n'; Chunk boundary != JSON boundary
-    // A chunk can have multiple JSON objects:
-    //     '{"type": "ADDED"}\n{"type": "ADDED"}\n'
-    // A JSON object can be splitted into multiple chunks:
-    //     '{"type": "AD', 'DE', 'D"}\n'
-    let buf = ''
-    function getChunk(chunk: string) {
-      buf += chunk
-      while (true) {
-        const pos = buf.indexOf('\n')
-        if (pos < 0) break
-        callback(JSON.parse(buf.slice(0, pos)))
-        buf = buf.slice(pos + 1)
-      }
-    }
-    await this.requestChunks(requestOpts, getChunk)
-  }
-
-  /**
-   * Sends an API request and calls the callback function on each receiving chunk.
-   *
-   * @param requestOpts - API request options
-   * @param callback - Callback function for each chunk
-   */
-  protected async requestChunks(
-    requestOpts: RequestOpts,
-    callback: (chunk: string) => void
-  ): Promise<void> {
-    const { input, init } = this.createFetchParams(requestOpts)
-    log.debug('request input: %s', input)
-    log.debug('request init: %o', init)
-    const response = (await modules.fetchStream(input, init)) as FetchResponse
-    if (response.status < 200 || response.status >= 300) {
-      log.debug('request error: %o', response)
-      throw new Error(`${response.status}: ${response.statusText}`)
-    }
-    if (!response.body) {
-      throw new Error(`Invalid response body ${response.body}`)
-    }
-    if (process.browser) {
-      const reader = response.body.getReader() // Some browsers require polyfill for this
-      const decoder = new TextDecoder('utf-8')
-      while (true) {
-        const { done, value } = await reader.read()
-        if (value) {
-          callback(decoder.decode(value))
-        }
-        if (done) {
-          break
-        }
-      }
-    } else {
-      await new Promise((resolve, reject) => {
-        const decoder = new (modules.stringDecoder as typeof StringDecoder)('utf8')
-        response.body.on('data', (chunk: Uint8Array) => {
-          callback(decoder.write(chunk))
-        })
-        response.body.on('error', (err: Error) => {
-          response.body && response.body.end()
-          reject(err)
-        })
-        response.body.on('end', () => {
-          response.body && response.body.end()
-          resolve()
-        })
-      })
-    }
-  }
-
-  /**
-   * Creates fetch parameters from the requirest options.
-   *
-   * @param requestOpts - API request options
-   * @returns Fetch parameters
-   */
-  private createFetchParams(requestOpts: RequestOpts): FetchParams {
-    const qs = () => {
-      const { query } = requestOpts
-      if (query && Object.keys(query).length > 0) {
-        return `?${querystring.stringify(query)}`
-      }
-      return ''
-    }
-    let url = this.basePath + requestOpts.path + qs()
-    const body = JSON.stringify(requestOpts.body)
-    const init = {
-      method: requestOpts.method,
-      headers: Object.assign({}, this.defaultHTTPHeaders(requestOpts.method), requestOpts.headers),
-      body,
-      signal: requestOpts.signal
-    }
-    return { input: url, init }
-  }
-
-  private defaultHTTPHeaders(method: string): HTTPHeaders {
-    return {
-      'Content-Type':
-        method === 'PATCH' ? 'application/strategic-merge-patch+json' : 'application/json'
-    }
-  }
+const log = {
+  warn: logging('cross-kube:runtime:warn'),
+  debug: logging('cross-kube:runtime:debug')
 }
 
 /**
@@ -276,6 +48,7 @@ export interface FetchParams {
  * HTTP request options
  */
 export interface RequestOpts {
+  basePath: string
   path: string
   method: HTTPMethod
   headers: HTTPHeaders
@@ -341,3 +114,229 @@ export type ItemType<T> = T extends { items: Array<infer I> }
     ? I
     : never
   : never
+
+/**
+ * Base interface of Kubernetes objects
+ */
+export interface KubeObject {
+  apiVersion?: string
+  kind?: string
+  metadata?: {
+    namespace?: string
+    name?: string
+    resourceVersion?: string
+    uid?: string
+  }
+}
+
+/**
+ * Base interface of Kubernetes list
+ */
+export interface KubeList<T extends KubeObject> extends KubeObject {
+  items?: T[]
+}
+
+/**
+ * Kubernetes event type
+ */
+export enum KubeEventType {
+  Added = 'ADDED',
+  Modified = 'MODIFIED',
+  Deleted = 'DELETED'
+}
+
+/**
+ * Kubernetes event
+ */
+export interface KubeEvent<T extends KubeObject> {
+  type: KubeEventType
+  object: T
+}
+
+// `process.browser` is a flag to distinguish two environments: browser/nodejs
+// It will be replaced by Rollup.js to true or false
+declare var process: {
+  browser: boolean
+}
+
+const nodeFetch = process.browser ? undefined : require('node-fetch/lib/index.js').default
+const fetchStream = process.browser ? require('fetch-readablestream') : nodeFetch
+const StringDecoder = process.browser ? undefined : require('string_decoder').StringDecoder
+
+/**
+ * Sends an API request and gets the response.
+ *
+ * @param requestOpts - API request options
+ * @returns API response
+ */
+export async function request(...requestOptsArray: Partial<RequestOpts>[]): Promise<Response> {
+  const requestOpts = mergeRequestOpts(...requestOptsArray)
+  const { input, init } = createFetchParams(requestOpts)
+  log.debug('request input: %s', input)
+  log.debug('request init: %o', init)
+  const response = await (process.browser ? fetch(input, init) : nodeFetch(input, init))
+  if (response.status < 200 || response.status >= 300) {
+    const text = await response.text()
+    log.debug('request error: %o %o', response, text)
+    const error = new Error(`${response.status}: ${response.statusText}`)
+    Object.assign(error, {
+      status: response.status,
+      statusText: response.statusText,
+      text
+    })
+    throw error
+  }
+  return response
+}
+
+/**
+ * Sends an API request and calls the callback function on each receiving event.
+ *
+ * @param requestOpts - API request options
+ * @param callback - Callback function for each event
+ */
+export async function requestStream<T>(
+  callback: (event: KubeEvent<T>) => void,
+  ...requestOptsArray: Partial<RequestOpts>[]
+): Promise<void> {
+  // JSON boundary is '\n'; Chunk boundary != JSON boundary
+  // A chunk can have multiple JSON objects:
+  //     '{"type": "ADDED"}\n{"type": "ADDED"}\n'
+  // A JSON object can be splitted into multiple chunks:
+  //     '{"type": "AD', 'DE', 'D"}\n'
+  let buf = ''
+  function getChunk(chunk: string) {
+    buf += chunk
+    while (true) {
+      const pos = buf.indexOf('\n')
+      if (pos < 0) break
+      callback(JSON.parse(buf.slice(0, pos)))
+      buf = buf.slice(pos + 1)
+    }
+  }
+  await requestChunks(getChunk, ...requestOptsArray)
+}
+
+/**
+ * Sends an API request and calls the callback function on each receiving chunk.
+ *
+ * @param requestOpts - API request options
+ * @param callback - Callback function for each chunk
+ */
+async function requestChunks(
+  callback: (chunk: string) => void,
+  ...requestOptsArray: Partial<RequestOpts>[]
+): Promise<void> {
+  const requestOpts = mergeRequestOpts(...requestOptsArray)
+  const { input, init } = createFetchParams(requestOpts)
+  log.debug('request input: %s', input)
+  log.debug('request init: %o', init)
+  const response = (await fetchStream(input, init)) as FetchResponse
+  if (response.status < 200 || response.status >= 300) {
+    const text = await response.text()
+    log.debug('request error: %o %o', response, text)
+    const error = new Error(`${response.status}: ${response.statusText}`)
+    Object.assign(error, {
+      status: response.status,
+      statusText: response.statusText,
+      text
+    })
+    throw error
+  }
+  if (!response.body) {
+    throw new Error(`Invalid response body ${response.body}`)
+  }
+  if (process.browser) {
+    const reader = response.body.getReader() // Some browsers require polyfill for this
+    const decoder = new TextDecoder('utf-8')
+
+    let closed = false
+    reader.closed
+      .then(() => {
+        closed = true
+      })
+      .catch(err => {
+        if (
+          `${err}` === 'TypeError: The expression cannot be converted to return the specified type.'
+        ) {
+          // Firefox throws this after the chunk is successfully read
+          log.warn('Catch TypeError on reading response from `%s`; continue', input)
+        } else {
+          console.error(err)
+        }
+        closed = true
+      })
+
+    while (!closed) {
+      const { done, value } = await reader.read()
+      if (value) {
+        callback(decoder.decode(value))
+      }
+      if (done) {
+        break
+      }
+    }
+  } else {
+    await new Promise((resolve, reject) => {
+      const decoder = new StringDecoder('utf8')
+      response.body.on('data', (chunk: Uint8Array) => {
+        callback(decoder.write(chunk))
+      })
+      response.body.on('error', (err: Error) => {
+        response.body && response.body.end()
+        reject(err)
+      })
+      response.body.on('end', () => {
+        response.body && response.body.end()
+        resolve()
+      })
+    })
+  }
+}
+
+function defaultHTTPHeaders(method: string): HTTPHeaders {
+  return {
+    'Content-Type':
+      method === 'PATCH' ? 'application/strategic-merge-patch+json' : 'application/json'
+  }
+}
+
+export function mergeRequestOpts(...requestOptsArray: Partial<RequestOpts>[]): RequestOpts {
+  const headers = requestOptsArray.reduce(
+    (acc: HTTPHeaders, opts: Partial<RequestOpts>) => ({ ...acc, ...(opts.headers || {}) }),
+    {}
+  )
+  const merged = Object.assign({ basePath: DEFAULT_BASE_PATH }, ...requestOptsArray, { headers })
+  if (merged.path === null || merged.path === undefined) {
+    throw new Error('`path` is not specified')
+  }
+  if (merged.method === null || merged.method === undefined) {
+    throw new Error('`method` is not specified')
+  }
+  return merged
+}
+
+/**
+ * Creates fetch parameters from the requirest options.
+ *
+ * @param requestOpts - API request options
+ * @returns Fetch parameters
+ */
+function createFetchParams(requestOpts: RequestOpts): FetchParams {
+  const qs = () => {
+    const { query } = requestOpts
+    if (query && Object.keys(query).length > 0) {
+      return `?${querystring.stringify(query)}`
+    }
+    return ''
+  }
+  let url = requestOpts.basePath + requestOpts.path + qs()
+  const body = JSON.stringify(requestOpts.body)
+  const init = {
+    method: requestOpts.method,
+    headers: { ...defaultHTTPHeaders(requestOpts.method), ...requestOpts.headers },
+    body,
+    signal: requestOpts.signal
+  }
+  return { input: url, init }
+}

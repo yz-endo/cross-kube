@@ -1,11 +1,12 @@
 module.exports = {
   transform: {
-    '.(ts|tsx)': 'ts-jest'
+    '.ts': 'ts-jest'
   },
   testEnvironment: 'node',
-  testRegex: '/test\\/.*\\.test.tsx?$',
-  moduleFileExtensions: ['ts', 'tsx', 'js'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/test/', '/examples/'],
+  testRegex: '/test/.*\\.test\\.ts$',
+  moduleFileExtensions: ['ts', 'js'],
+  testPathIgnorePatterns: ['/node_modules/', '/examples/', '/custom/'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/test/', '/examples/', '/custom/'],
   coverageThreshold: {
     global: {
       branches: 90,
@@ -14,6 +15,6 @@ module.exports = {
       statements: 95
     }
   },
-  collectCoverageFrom: ['src/*.{js,ts}'],
+  collectCoverageFrom: ['src/*.ts'],
   verbose: true
 }

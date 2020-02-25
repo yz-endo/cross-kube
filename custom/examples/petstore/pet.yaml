@@ -1,0 +1,10 @@
+apiVersion: group.example.com/v1beta1
+kind: Pet
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: doggie
+spec:
+  category: dog
+status:
+  available: true

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "moduleResolution": "node",
+    "target": "es2017",
+    "module": "es2015",
+    "lib": ["dom", "es2015", "es2016", "es2017"],
+    "strict": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "typeRoots": ["node_modules/@types"],
+    "types": ["jest", "node"]
+  },
+  "include": ["src", "test"]
+}

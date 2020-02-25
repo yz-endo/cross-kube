@@ -17,7 +17,7 @@ mkdir -p "${OUTPUT_DIR}"
 python "${SCRIPT_ROOT}/preprocess_spec.py" \
     crosskube "${KUBERNETES_BRANCH}" "${SWAGGER_JSON}" kubernetes kubernetes
 
-PLUGIN_VERSION=4.0.2; \
+PLUGIN_VERSION=4.0.3
 mvn -f cross-kube.xml compile \
     -Dgenerator.spec.path="${SWAGGER_JSON}" \
     -Dgenerator.output.path="${OUTPUT_DIR}" \
@@ -32,16 +32,13 @@ rm -f generated/apis/LogsApi.ts
 for f in generated/models/*.ts; do
     g=${f#generated/models/}
     m=${g%%.ts}
-    echo "export { default as ${m} } from './${m}'" >> generated/models/index.ts
-done
-
-for f in generated/apis/*.ts; do
-    g=${f#generated/apis/}
-    a=${g%%.ts}
-    echo "export { default as ${a} } from './${a}'" >> generated/apis/index.ts
+    echo "export * from './${m}'" >>generated/models/index.ts
 done
 
 cp -rpfv generated/{models,apis} src
+
+tslint --fix src/models/*.ts
+tslint --fix src/apis/*.ts
 
 prettier --write src/models/*.ts
 prettier --write src/apis/*.ts

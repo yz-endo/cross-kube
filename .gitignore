@@ -30,3 +30,4 @@ lerna-debug.log*
 
 /generated
 /lib
+/cross-kube-*.tgz
