@@ -57,13 +57,13 @@ export default abstract class BaseCommand extends Command {
     return new Promise((resolve, reject) => {
       const proc = spawn(command, args, options)
 
-      proc.stdout!.on('data', data => {
+      proc.stdout!.on('data', (data) => {
         process.stdout.write(data.toString())
       })
-      proc.stderr!.on('data', data => {
+      proc.stderr!.on('data', (data) => {
         process.stderr.write(data.toString())
       })
-      proc.on('close', code => {
+      proc.on('close', (code) => {
         if (code === 0) {
           resolve()
         } else {
@@ -80,7 +80,7 @@ export default abstract class BaseCommand extends Command {
   ): Promise<void> {
     const k8sSwaggerUrl = `https://raw.githubusercontent.com/kubernetes/kubernetes/${branch}/api/openapi-spec/swagger.json`
     this.log('Downloading k8s swagger.json: %s', k8sSwaggerUrl)
-    const res = await fetch(k8sSwaggerUrl, { agent: proxy ? new ProxyAgent(proxy) : undefined })
+    const res = await fetch(k8sSwaggerUrl, { agent: proxy ? ProxyAgent(proxy) : undefined })
     await new Promise((resolve, reject) => {
       const stream = fs.createWriteStream(outputPath)
       res.body.pipe(stream)
