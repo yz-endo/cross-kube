@@ -14,7 +14,7 @@ import {
 import { KubeEvent } from 'cross-kube'
 import { sleep, defaultRequestOpts, petManifest } from './helper'
 
-jest.setTimeout(10000)
+jest.setTimeout(100000)
 
 const testNamespace = 'petstore-test'
 
