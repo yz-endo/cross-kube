@@ -60,7 +60,7 @@
     "fetch-readablestream": "^0.2.0",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.6.0",
-    "query-string": "^6.9.0",
+    "query-string": "^6.13.7",
     "rimraf": "^3.0.2",
     "tslib": "^1.10.0"
   },
