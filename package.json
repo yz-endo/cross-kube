@@ -85,7 +85,7 @@
     "jest": "^24.9.0",
     "jest-config": "^24.9.0",
     "js-yaml": "^3.13.1",
-    "lint-staged": "^9.5.0",
+    "lint-staged": "^11.0.0",
     "prettier": "^1.19.1",
     "rollup": "^1.28.0",
     "rollup-plugin-multi-input": "^1.0.3",
